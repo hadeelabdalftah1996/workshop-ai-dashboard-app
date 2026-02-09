@@ -109,12 +109,19 @@ else:
     st.warning("No ProjectChoice data available!")
 # ---------- Interactive Scatter/Bubble Chart ----------
 if not filtered_df.empty:
+    ai_colors = {
+        "Basic 🟢": '#2ca02c',
+        "Intermediate 🟡": '#ff7f0e',
+        "Advanced 🔵": '#1f77b4'
+    }
+
     fig_scatter = px.scatter(
         filtered_df,
         x="AI_Level_EN",
         y="Project_EN",
-        size_max=60,
         color="AI_Level_EN",
+        color_discrete_map=ai_colors,  # <-- هنا استخدمنا نفس الألوان
+        size_max=60,
         title="AI Level vs Project Preference",
         hover_data=["AILevel", "ProjectChoice"]
     )
@@ -124,14 +131,6 @@ if not filtered_df.empty:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.plotly_chart(fig_scatter, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
-# ---------- Table ----------
-st.write("### 📄 Detailed Responses")
-if not filtered_df.empty:
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.dataframe(filtered_df[["AILevel", "AI_Level_EN", "ProjectChoice", "Project_EN"]])
-    st.markdown("</div>", unsafe_allow_html=True)
-else:
-    st.info("No responses yet.")
 
 # ---------- Download Button ----------
 csv_data = filtered_df.to_csv(index=False)
