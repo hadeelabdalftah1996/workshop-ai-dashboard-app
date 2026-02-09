@@ -9,42 +9,23 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------- CSS لجمالية عالية ----------
+# ---------- CSS لجمالية ----------
 st.markdown("""
 <style>
 body {
     background: linear-gradient(135deg, #eef2f3 0%, #dfe9f3 100%);
 }
-h1 {
-    font-size: 42px !important;
-    font-weight: 800 !important;
-    letter-spacing: 1px;
-}
-.plot-container > div {
-    border-radius: 15px;
-}
-.block-container {
-    padding-top: 1rem;
-}
-.sidebar .sidebar-content {
-    background-color: #f7f9fc;
-}
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
+h1 { font-size: 42px !important; font-weight: 800 !important; letter-spacing: 1px; }
+.plot-container > div { border-radius: 15px; }
+.block-container { padding-top: 1rem; }
+.sidebar .sidebar-content { background-color: #f7f9fc; }
+.card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0px 4px 12px rgba(0,0,0,0.08); }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------- شعار الشركة ----------
 st.image("logo.jpg", width=150)
-
-st.markdown(
-    "<h1 style='text-align: center; color: #2E86C1;'>🤖 SEPCO Workshop AI Dashboard</h1>",
-    unsafe_allow_html=True
-)
+st.markdown("<h1 style='text-align: center; color: #2E86C1;'>🤖 SEPCO Workshop AI Dashboard</h1>", unsafe_allow_html=True)
 st.write("---")
 
 # ---------- رابط الشيت ----------
@@ -70,27 +51,37 @@ project_mapping = {
 }
 df["Project_EN"] = df["ProjectChoice"].map(project_mapping)
 
-# ---------- Sidebar Summary ----------
-st.sidebar.header("Summary")
-st.sidebar.write(f"📊 Total Responses: **{len(df)}**")
+# ---------- Sidebar Summary & Filters ----------
+st.sidebar.header("Filters / Summary")
+
+# Filters
+selected_ai = st.sidebar.multiselect("Select AI Level", df["AI_Level_EN"].unique(), default=df["AI_Level_EN"].unique())
+selected_proj = st.sidebar.multiselect("Select Project", df["Project_EN"].unique(), default=df["Project_EN"].unique())
+
+filtered_df = df[(df["AI_Level_EN"].isin(selected_ai)) & (df["Project_EN"].isin(selected_proj))]
+
+st.sidebar.write(f"📊 Total Responses: **{len(filtered_df)}**")
+
+# ---------- KPI Cards ----------
+col1, col2, col3 = st.columns(3)
+col1.metric("Total Responses", len(filtered_df))
+col2.metric("Advanced AI", f"{(filtered_df['AI_Level_EN']=='Advanced 🔵').mean()*100:.1f}%")
+most_popular = filtered_df['Project_EN'].mode()[0] if not filtered_df.empty else "N/A"
+col3.metric("Most Popular Project", most_popular)
+
+st.write("---")
 
 # ---------- Pie Chart AI ----------
-if not df.empty:
+if not filtered_df.empty:
     fig_ai = px.pie(
-        df,
+        filtered_df,
         names="AI_Level_EN",
-        title="AI Knowledge Level Distribution",
+        title="AI Knowledge Level Distribution 🔹",
         color_discrete_sequence=['#2ca02c', '#ff7f0e', '#1f77b4'],
         hole=0.4
     )
-    fig_ai.update_traces(
-        textposition='inside',
-        textinfo='percent+label',
-        pull=[0.05]*len(df["AI_Level_EN"].unique()),
-        textfont_size=20
-    )
+    fig_ai.update_traces(textposition='inside', textinfo='percent+label', pull=[0.05]*len(filtered_df["AI_Level_EN"].unique()), textfont_size=20)
     fig_ai.update_layout(legend=dict(font=dict(size=18)))
-
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.plotly_chart(fig_ai, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -98,23 +89,17 @@ else:
     st.warning("No AILevel data available!")
 
 # ---------- Pie Chart Projects ----------
-if not df.empty:
-    project_counts = df['Project_EN'].value_counts()
+if not filtered_df.empty:
+    project_counts = filtered_df['Project_EN'].value_counts()
     fig_proj = px.pie(
         names=project_counts.index,
         values=project_counts.values,
-        title="Project Preference Distribution",
+        title="Project Preference Distribution 📊",
         color_discrete_sequence=px.colors.qualitative.Set3,
         hole=0.4
     )
-    fig_proj.update_traces(
-        textposition='inside',
-        textinfo='percent+label',
-        pull=[0.05]*len(project_counts),
-        textfont_size=20
-    )
+    fig_proj.update_traces(textposition='inside', textinfo='percent+label', pull=[0.05]*len(project_counts), textfont_size=20)
     fig_proj.update_layout(legend=dict(font=dict(size=18)))
-
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.plotly_chart(fig_proj, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -123,9 +108,18 @@ else:
 
 # ---------- Table ----------
 st.write("### 📄 Detailed Responses")
-if not df.empty:
+if not filtered_df.empty:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.dataframe(df[["AILevel", "AI_Level_EN", "ProjectChoice", "Project_EN"]])
+    st.dataframe(filtered_df[["AILevel", "AI_Level_EN", "ProjectChoice", "Project_EN"]])
     st.markdown("</div>", unsafe_allow_html=True)
 else:
     st.info("No responses yet.")
+
+# ---------- Download Button ----------
+csv_data = filtered_df.to_csv(index=False)
+st.download_button(
+    label="Download Filtered CSV",
+    data=csv_data,
+    file_name="filtered_responses.csv",
+    mime="text/csv"
+)
