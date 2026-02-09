@@ -65,9 +65,13 @@ st.sidebar.write(f"📊 Total Responses: **{len(filtered_df)}**")
 # ---------- KPI Cards ----------
 col1, col2, col3 = st.columns(3)
 col1.metric("Total Responses", len(filtered_df))
-col2.metric("Advanced AI", f"{(filtered_df['AI_Level_EN']=='Advanced 🔵').mean()*100:.1f}%")
-most_popular = filtered_df['Project_EN'].mode()[0] if not filtered_df.empty else "N/A"
-col3.metric("Most Popular Project", most_popular)
+
+# هنا نغيره ليعرض Most Popular AI Level
+most_popular_ai = filtered_df['AI_Level_EN'].mode()[0] if not filtered_df.empty else "N/A"
+col2.metric("Most Popular AI Level", most_popular_ai)
+
+most_popular_project = filtered_df['Project_EN'].mode()[0] if not filtered_df.empty else "N/A"
+col3.metric("Most Popular Project", most_popular_project)
 
 st.write("---")
 
