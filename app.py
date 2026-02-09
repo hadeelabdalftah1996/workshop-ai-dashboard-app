@@ -107,7 +107,23 @@ if not filtered_df.empty:
     st.markdown("</div>", unsafe_allow_html=True)
 else:
     st.warning("No ProjectChoice data available!")
-
+# ---------- Interactive Scatter/Bubble Chart ----------
+if not filtered_df.empty:
+    fig_scatter = px.scatter(
+        filtered_df,
+        x="AI_Level_EN",
+        y="Project_EN",
+        size_max=60,
+        color="AI_Level_EN",
+        title="AI Level vs Project Preference",
+        hover_data=["AILevel", "ProjectChoice"]
+    )
+    fig_scatter.update_traces(marker=dict(size=15, line=dict(width=1, color='DarkSlateGrey')))
+    fig_scatter.update_layout(legend=dict(title="AI Level", font=dict(size=14)))
+    
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.plotly_chart(fig_scatter, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 # ---------- Table ----------
 st.write("### 📄 Detailed Responses")
 if not filtered_df.empty:
