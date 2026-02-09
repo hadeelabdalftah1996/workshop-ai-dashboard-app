@@ -64,6 +64,25 @@ st.sidebar.write(f"📊 Total Responses: **{len(filtered_df)}**")
 # ---------- قراءة البيانات ----------
 df = pd.read_csv(sheet_url)
 
+# ---------- Mapping AI ----------
+mapping_ai = {
+    "معرفة بسيطة": "Basic 🟢",
+    "معرفة متوسطة": "Intermediate 🟡",
+    "معرفة متقدمة": "Advanced 🔵"
+}
+df["AI_Level_EN"] = df["AILevel"].map(mapping_ai)
+
+# ---------- Mapping Projects ----------
+project_mapping = {
+    "كتابة وتحديث إجراءات التشغيل SOP": "Writing & Updating SOP 📝",
+    "تحليل وبناء FMEA": "FMEA Analysis 📊",
+    "تحليل الأعطال والتوقفات القسرية": "Failure & Downtime Analysis ⚡",
+    "مساعد للمشغل والمهندس – Ops & Maintenance Copilot": "Ops & Maintenance Copilot 🤖",
+    "التحكم بالوصول إلى مراكز البيانات": "Access Control 🔐",
+    "تخطيط المشتريات": "Procurement Planning 📦"
+}
+df["Project_EN"] = df["ProjectChoice"].map(project_mapping)
+
 # ---------- Sidebar Filters ----------
 st.sidebar.header("Filters")
 selected_ai = st.sidebar.multiselect("Select AI Level:", df["AI_Level_EN"].unique())
@@ -74,14 +93,12 @@ filtered_df = df[
     (df["AI_Level_EN"].isin(selected_ai) if selected_ai else True) &
     (df["Project_EN"].isin(selected_projects) if selected_projects else True)
 ]
+
 # ---------- KPI Cards ----------
 col1, col2, col3 = st.columns(3)
 col1.metric("Total Responses", len(filtered_df))
-
-# هنا نغيره ليعرض Most Popular AI Level
 most_popular_ai = filtered_df['AI_Level_EN'].mode()[0] if not filtered_df.empty else "N/A"
 col2.metric("Most Popular AI Level", most_popular_ai)
-
 most_popular_project = filtered_df['Project_EN'].mode()[0] if not filtered_df.empty else "N/A"
 col3.metric("Most Popular Project", most_popular_project)
 
