@@ -61,7 +61,19 @@ selected_proj = st.sidebar.multiselect("Select Project", df["Project_EN"].unique
 filtered_df = df[(df["AI_Level_EN"].isin(selected_ai)) & (df["Project_EN"].isin(selected_proj))]
 
 st.sidebar.write(f"📊 Total Responses: **{len(filtered_df)}**")
+# ---------- قراءة البيانات ----------
+df = pd.read_csv(sheet_url)
 
+# ---------- Sidebar Filters ----------
+st.sidebar.header("Filters")
+selected_ai = st.sidebar.multiselect("Select AI Level:", df["AI_Level_EN"].unique())
+selected_projects = st.sidebar.multiselect("Select Project:", df["Project_EN"].unique())
+
+# ---------- فلترة البيانات ----------
+filtered_df = df[
+    (df["AI_Level_EN"].isin(selected_ai) if selected_ai else True) &
+    (df["Project_EN"].isin(selected_projects) if selected_projects else True)
+]
 # ---------- KPI Cards ----------
 col1, col2, col3 = st.columns(3)
 col1.metric("Total Responses", len(filtered_df))
