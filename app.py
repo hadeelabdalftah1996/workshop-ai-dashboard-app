@@ -31,7 +31,7 @@ st.write("---")
 # ---------- رابط الشيت ----------
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTeUXVi-EbjECbsrtKKSE4kjFsg5sUi-s0Ezj8PdyWL0yw4DxeNjVVEYPAuJBj00B0KYVqgoRO1TuPD/pub?output=csv"
 df = pd.read_csv(sheet_url)
-
+df.columns = df.columns.str.strip()
 # ---------- Mapping AI ----------
 mapping_ai = {
     "معرفة بسيطة": "Basic 🟢",
